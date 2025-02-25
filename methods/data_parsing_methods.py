@@ -7,45 +7,39 @@ import json
 class Base_data_method:
     ########################################################
     # download image from cards class
-    def is_valid_image(self, url):
-        """Vérifie si l'image est valide en évitant les placeholders génériques."""
+    def is_valid_image(self, url: str) -> bool:
+        """Checks if the image URL is valid, avoiding placeholder images."""
         if not url:
             return False
         
-        try:
-            response = requests.head(url, timeout=5)
-            if response.status_code != 200:
-                return False
-            
-            # Certains placeholders de Scryfall contiennent des motifs spécifiques
-            forbidden_patterns = ["missing", "placeholder", "en/normal/back"]
-            return not any(pattern in url for pattern in forbidden_patterns)
-
-        except requests.RequestException:
-            return False
+        forbidden_patterns = {"missing", "placeholder", "en/normal/back"}
+        return not any(pattern in url for pattern in forbidden_patterns)
 
     # Fonction pour télécharger une image
     def download_card_image(self,cards:Card,output_dir:str):
         """Télécharge les images valides en évitant les placeholders."""
         os.makedirs(output_dir, exist_ok=True)
         images = cards.get_images()
-
+        existing_files = set(os.listdir(output_dir))
         for url, filename in images:
-            file_path = os.path.join(output_dir, filename)
-            if os.path.exists(file_path):
-                continue  # Ignore
-
-            if self.is_valid_image(url):
-                try:
-                    response = requests.get(url, stream=True, timeout=10)
-                    if response.status_code == 200:
-                        with open(file_path, "wb") as file:
-                            for chunk in response.iter_content(1024):
-                                file.write(chunk)
-                    else:
-                        print(f"❌ Failed to download : {url}")
-                except requests.RequestException as e:
-                    print(f"❌ Failed to download {url}: {e}")
+            if filename in existing_files:
+                continue  # Skip already downloaded files
+            
+            if not self.is_valid_image(url):
+                continue  # Skip invalid images
+            
+            file_path = os.path.join(self.output_dir, filename)
+            try:
+                response = requests.get(url, stream=True, timeout=10)
+                if response.status_code == 200:
+                    with open(file_path, "wb") as file:
+                        for chunk in response.iter_content(1024):
+                            file.write(chunk)
+                    existing_files.add(filename)  # Update cache
+                else:
+                    print(f"❌ Failed to download: {url} (HTTP {response.status_code})")
+            except requests.RequestException as e:
+                print(f"❌ Failed to download {url}: {e}")
 
     ########################################################
     # download Data and parse json
