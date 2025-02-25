@@ -3,6 +3,7 @@ import ijson
 import requests
 from common_class.Cards import Card
 import json
+from concurrent.futures import ThreadPoolExecutor
 
 class Base_data_method:
     ########################################################
@@ -16,30 +17,34 @@ class Base_data_method:
         return not any(pattern in url for pattern in forbidden_patterns)
 
     # Fonction pour télécharger une image
-    def download_card_image(self,cards:Card,output_dir:str):
+    def download_card_image(self,cards:Card,output_dir:str, max_workers=8):
         """Télécharge les images valides en évitant les placeholders."""
         os.makedirs(output_dir, exist_ok=True)
         images = cards.get_images()
-        existing_files = set(os.listdir(output_dir))
-        for url, filename in images:
-            if filename in existing_files:
-                continue  # Skip already downloaded files
+        existing_files = set(os.listdir(output_dir))  # Set de noms de fichiers uniquement
+
+        def download_image(url, filename):
+            if filename in existing_files:  # Vérification rapide
+                return
             
             if not self.is_valid_image(url):
-                continue  # Skip invalid images
+                return
             
-            file_path = os.path.join(self.output_dir, filename)
             try:
-                response = requests.get(url, stream=True, timeout=10)
+                response = requests.get(url, timeout=5)
                 if response.status_code == 200:
+                    file_path = os.path.join(output_dir, filename)
                     with open(file_path, "wb") as file:
-                        for chunk in response.iter_content(1024):
-                            file.write(chunk)
-                    existing_files.add(filename)  # Update cache
+                        file.write(response.content)
+                    existing_files.add(filename)  # Mise à jour du cache local
                 else:
                     print(f"❌ Failed to download: {url} (HTTP {response.status_code})")
             except requests.RequestException as e:
                 print(f"❌ Failed to download {url}: {e}")
+
+        # Téléchargement en parallèle
+        with ThreadPoolExecutor(max_workers=max_workers) as executor:
+            executor.map(lambda img: download_image(*img), images)
 
     ########################################################
     # download Data and parse json
