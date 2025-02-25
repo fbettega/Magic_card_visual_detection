@@ -22,7 +22,7 @@ class Card:
 
         # Gestion des cartes en fonction de leur layout
         self.card_faces = data.get("card_faces", [])
-
+        self.image_status = data.get("image_status", "")  # Ajout de image_status
         if self.layout in {"transform", "modal_dfc", "double_faced_token"}:
             # Cartes double face (recto/verso)
             self.name_front = self.card_faces[0].get("name", "Unknown Front")
@@ -42,7 +42,7 @@ class Card:
             self.toughness_back = self.card_faces[1].get("toughness", "")
             self.colors_back = self.card_faces[1].get("colors", [])
             self.image_uris_back = self.card_faces[1].get("image_uris", {})
-
+            
         elif self.layout in {"adventure", "split", "flip"}:
             # Cartes d'aventure ou fractionnées
             self.name_front = self.card_faces[0].get("name", "Unknown Front")

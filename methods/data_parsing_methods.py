@@ -8,13 +8,14 @@ from concurrent.futures import ThreadPoolExecutor
 class Base_data_method:
     ########################################################
     # download image from cards class
-    def is_valid_image(self, url: str) -> bool:
+    def is_valid_image(self, url: str,image_status: str) -> bool:
         """Checks if the image URL is valid, avoiding placeholder images."""
-        if not url:
+        if not url or image_status in {"missing", "placeholder"}:
             return False
         
         forbidden_patterns = {"missing", "placeholder", "en/normal/back"}
-        return not any(pattern in url for pattern in forbidden_patterns)
+
+        return not any(pattern in url for pattern in forbidden_patterns) 
 
     # Fonction pour télécharger une image
     def download_card_images(self,cards, output_dir, max_workers=8):
@@ -22,11 +23,11 @@ class Base_data_method:
         os.makedirs(output_dir, exist_ok=True)
         existing_files = set(os.listdir(output_dir))  # Set de noms de fichiers uniquement
 
-        def download_image(url, filename):
+        def download_image(url, filename,image_status):
             if filename in existing_files:  # Vérification rapide
                 return
             
-            if not self.is_valid_image(url):
+            if not self.is_valid_image(url,image_status):
                 return
             
             try:
@@ -43,7 +44,8 @@ class Base_data_method:
 
         images = []
         for card in cards:
-            images.extend(card.get_images())
+            for url, filename in card.get_images():
+                images.append((url, filename, card.image_status))
 
         # Téléchargement en parallèle
         with ThreadPoolExecutor(max_workers=max_workers) as executor:
