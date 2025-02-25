@@ -1,4 +1,7 @@
 import os
+import shutil
+from PIL import Image
+import numpy as np
 import ijson
 import requests
 from common_class.Cards import Card
@@ -13,15 +16,16 @@ class Base_data_method:
         if not url or image_status in {"missing", "placeholder"}:
             return False
         
-        forbidden_patterns = {"missing", "placeholder", "en/normal/back"}
+        forbidden_patterns = {"missing", "placeholder", "en/normal/back", "default_back"}
 
         return not any(pattern in url for pattern in forbidden_patterns) 
 
     # Fonction pour télécharger une image
-    def download_card_images(self,cards: dict[str, Card], output_dir: str, max_workers=8):
+    def download_card_images(self,cards: dict[str, Card], output_dir: str, bad_image_dir: str, max_workers=8):
         """Télécharge les images de toutes les cartes fournies."""
         os.makedirs(output_dir, exist_ok=True)
-        existing_files = set(os.listdir(output_dir))  # Set de noms de fichiers uniquement
+        os.makedirs(bad_image_dir, exist_ok=True)
+        existing_files = set(os.listdir(output_dir)) | set(os.listdir(bad_image_dir))  # Set de noms de fichiers uniquement
 
         def download_image(url, filename,image_status):
             if filename in existing_files:  # Vérification rapide
@@ -63,7 +67,7 @@ class Base_data_method:
         return cards_dict
 
 
-    def download_all_cards(output_dir="data/scryfall_bulk_data"):
+    def download_all_cards(output_dir:str):
         url = "https://api.scryfall.com/bulk-data"
         response = requests.get(url)
 
@@ -95,6 +99,49 @@ class Base_data_method:
                 print(f"❌ Failed to download {name}")
         else:
             print("❌ 'All Cards' not found in Scryfall data")
+    #######################################################################
+    def is_card_back(image_path: str, back_card_reference: str, threshold=0.95) -> bool:
+        """Compare une image avec une référence du dos de carte et retourne True si c'est un dos de carte."""
+        try:
+        # Vérifie si c'est bien un fichier image
+            if not os.path.isfile(image_path):
+                print(f"⚠️ Fichier ignoré (non valide) : {image_path}")
+                return False
 
- 
+            img = Image.open(image_path).convert("L").resize((100, 100))  # Grayscale + Resize
+            ref = Image.open(back_card_reference).convert("L").resize((100, 100))
 
+            hist_img = np.array(img.histogram())
+            hist_ref = np.array(ref.histogram())
+
+            # Similarité cosinus entre les histogrammes
+            similarity = np.dot(hist_img, hist_ref) / (np.linalg.norm(hist_img) * np.linalg.norm(hist_ref))
+            return similarity > threshold
+        except Exception as e:
+            print(f"Erreur lors de la vérification de {image_path} : {e}")
+            return False
+
+    def detect_and_move_back(self,image_entry, back_reference, bad_images_dir):
+        """Détecte si l'image est un dos de carte et la déplace si nécessaire."""
+        if image_entry.name == ".gitignore":
+            return None  # Ignorer .gitignore
+        image_path = image_entry.path
+        if Base_data_method.is_card_back(image_path, back_reference):
+            new_path = os.path.join(bad_images_dir, image_entry.name)
+            shutil.move(image_path, new_path)  # Déplacement
+            return image_entry.name  # Retourne le nom des fichiers déplacés
+        return None
+
+    def move_card_backs_parallel(self,images_dir, back_reference, bad_images_dir, max_workers=8):
+        """Parallélise la détection et le déplacement des dos de cartes."""
+        os.makedirs(bad_images_dir, exist_ok=True)
+        with ThreadPoolExecutor(max_workers=max_workers) as executor:
+            # Scan rapide des fichiers (sans précharger la liste en mémoire)
+            with os.scandir(images_dir) as entries:
+                futures = [executor.submit(self.detect_and_move_back, entry, back_reference, bad_images_dir)
+                        for entry in entries if entry.is_file()]
+
+            # Récupération des fichiers déplacés
+            moved_files = [future.result() for future in futures if future.result()]
+
+        print(f"✅ {len(moved_files)} dos de cartes déplacés vers {bad_images_dir}.")

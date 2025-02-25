@@ -1,2 +1,4 @@
 ijson==3.3.0
+numpy==2.2.3
+Pillow==11.1.0
 Requests==2.32.3
