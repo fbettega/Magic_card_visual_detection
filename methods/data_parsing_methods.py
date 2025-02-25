@@ -14,7 +14,7 @@ class Base_data_method:
     def is_valid_image(self, url: str,image_status: str) -> bool:
         """Checks if the image URL is valid, avoiding placeholder images."""
         if not url or image_status in {"missing", "placeholder"}:
-            return False
+            return False 
         
         forbidden_patterns = {"missing", "placeholder", "en/normal/back", "default_back"}
 
@@ -52,7 +52,7 @@ class Base_data_method:
 
         # Téléchargement en parallèle
         with ThreadPoolExecutor(max_workers=max_workers) as executor:
-            futures = [executor.submit(download_image, url, filename, card.image_status) for url, filename in images]
+            futures = [executor.submit(download_image, url, filename, image_status) for url, filename , image_status in images]
             for future in futures:
                 future.result()
 

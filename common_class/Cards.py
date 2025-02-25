@@ -94,13 +94,12 @@ class Card:
                 image_url = face.get("image_uris", {}).get("normal")
                 if image_url:
                     face_name = self.sanitize_filename(face.get("name", f"face_{i}"))
-                    images.append((image_url, f"{self.id}_{face_name}.jpg"))
+                    images.append((image_url, f"{self.id}_{face_name}.jpg",self.image_status))
 
         elif self.image_uris_front:
             image_url = self.image_uris_front.get("normal")
             if image_url:
                 name_cleaned = self.sanitize_filename(self.name_front)
-                images.append((image_url, f"{self.id}_{name_cleaned}.jpg"))
-
+                images.append((image_url, f"{self.id}_{name_cleaned}.jpg",self.image_status))
         return images
 
