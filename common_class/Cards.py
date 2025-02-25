@@ -76,12 +76,10 @@ class Card:
 
 
     def __repr__(self):
-        if self.card_faces:
-            return (f"Card({self.name_front} // {self.name_back}, {self.type_line_front} // {self.type_line_back}, "
-                    f"Set: {self.set_name}, Collector #: {self.collector_number})")
-        else:
-            return (f"Card({self.name_front}, {self.type_line_front}, {self.rarity}, "
-                    f"Set: {self.set_name}, Collector #: {self.collector_number})")
+        attrs = vars(self)  # Récupère tous les attributs sous forme de dict
+        attr_str = ", ".join(f"{k}={v!r}" for k, v in attrs.items())  # Formatte chaque clé-valeur
+        return f"Card({attr_str})"
+
 
     def sanitize_filename(self, name):
         """Remplace les espaces et caractères spéciaux pour un nom de fichier valide."""

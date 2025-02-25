@@ -18,7 +18,7 @@ class Base_data_method:
         return not any(pattern in url for pattern in forbidden_patterns) 
 
     # Fonction pour télécharger une image
-    def download_card_images(self,cards, output_dir, max_workers=8):
+    def download_card_images(self,cards: dict[str, Card], output_dir: str, max_workers=8):
         """Télécharge les images de toutes les cartes fournies."""
         os.makedirs(output_dir, exist_ok=True)
         existing_files = set(os.listdir(output_dir))  # Set de noms de fichiers uniquement
@@ -43,23 +43,24 @@ class Base_data_method:
                 print(f"❌ Failed to download {url}: {e}")
 
         images = []
-        for card in cards:
-            for url, filename in card.get_images():
-                images.append((url, filename, card.image_status))
+        for card in cards.values():  # Correction : itérer sur les valeurs
+            images.extend(card.get_images())
 
         # Téléchargement en parallèle
         with ThreadPoolExecutor(max_workers=max_workers) as executor:
-            executor.map(lambda img: download_image(*img), images)
+            futures = [executor.submit(download_image, url, filename, card.image_status) for url, filename in images]
+            for future in futures:
+                future.result()
 
     ########################################################
     # download Data and parse json
     # Fonction pour parser un gros JSON et stocker les cartes dans une liste
-    def parse_large_json(file_path):
-        cards_list = []
+    def parse_large_json(file_path:str) -> dict[str, Card]:
+        cards_dict = {}
         with open(file_path, 'r', encoding='utf-8') as f:
             for item in ijson.items(f, "item"):
-                cards_list.append(Card(item))
-        return cards_list
+                cards_dict[item["id"]] = Card(item)
+        return cards_dict
 
 
     def download_all_cards(output_dir="data/scryfall_bulk_data"):
@@ -92,9 +93,7 @@ class Base_data_method:
                 print(f"✅ {name} successfully downloaded!")
             else:
                 print(f"❌ Failed to download {name}")
-
         else:
-
             print("❌ 'All Cards' not found in Scryfall data")
 
  
