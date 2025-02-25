@@ -6,9 +6,10 @@ if False:
 
 cards = Base_data_method.parse_large_json("data/scryfall_bulk_data/all_cards.json")
 
+Base_data_method().download_card_images(cards,"data/cards_image_gallery")
 
-for card in cards:
-    Base_data_method().download_card_image(card,"data/cards_image_gallery")
+
+
 
 for card in cards[:200]:  
         existing_files = set(os.listdir("data/cards_image_gallery"))  

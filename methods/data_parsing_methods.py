@@ -17,10 +17,9 @@ class Base_data_method:
         return not any(pattern in url for pattern in forbidden_patterns)
 
     # Fonction pour télécharger une image
-    def download_card_image(self,cards:Card,output_dir:str, max_workers=8):
-        """Télécharge les images valides en évitant les placeholders."""
+    def download_card_images(self,cards, output_dir, max_workers=8):
+        """Télécharge les images de toutes les cartes fournies."""
         os.makedirs(output_dir, exist_ok=True)
-        images = cards.get_images()
         existing_files = set(os.listdir(output_dir))  # Set de noms de fichiers uniquement
 
         def download_image(url, filename):
@@ -41,6 +40,10 @@ class Base_data_method:
                     print(f"❌ Failed to download: {url} (HTTP {response.status_code})")
             except requests.RequestException as e:
                 print(f"❌ Failed to download {url}: {e}")
+
+        images = []
+        for card in cards:
+            images.extend(card.get_images())
 
         # Téléchargement en parallèle
         with ThreadPoolExecutor(max_workers=max_workers) as executor:
