@@ -1,4 +1,3 @@
-import json
 from methods.data_parsing_methods import Base_data_method    
 import os
 Rerun_alll = False
