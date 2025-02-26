@@ -65,3 +65,18 @@ X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_
 model = RandomForestClassifier(n_estimators=100, n_jobs=-1, verbose=1)
 model.fit(X_train, y_train)
 
+# Évaluation
+accuracy = model.score(X_test, y_test)
+print(f"Précision du modèle : {accuracy:.2f}")
+
+# Sauvegarde du modèle
+dump(model, "layout_predictor_rf.joblib")
+
+# import xgboost as xgb
+# from joblib import dump
+
+# # Création du modèle XGBoost
+# model = xgb.XGBClassifier(n_estimators=100, max_depth=6, tree_method="hist", n_jobs=-1)
+# model.fit(X_train, y_train)
+# Sauvegarde du modèle
+# dump(model, "layout_predictor_xgb.joblib")
