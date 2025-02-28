@@ -1,5 +1,6 @@
 tensorflow[and-cuda]
 tensorrt
+cupy-cuda12x
 ijson
 joblib
 numpy
@@ -8,3 +9,4 @@ Requests
 scikit_learn
 scikit-image
 opencv-python
+xgboost
