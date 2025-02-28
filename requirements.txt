@@ -1,3 +1,5 @@
+tensorflow[and-cuda]
+tensorrt
 ijson
 joblib
 numpy
@@ -6,4 +8,3 @@ Requests
 scikit_learn
 scikit-image
 opencv-python
-    

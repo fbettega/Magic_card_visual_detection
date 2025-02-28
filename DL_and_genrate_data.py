@@ -25,5 +25,3 @@ Base_data_method().move_card_backs_parallel(images_dir, back_reference, bad_imag
 
 
 
-
-
