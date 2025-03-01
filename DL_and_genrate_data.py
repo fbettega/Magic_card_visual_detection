@@ -1,6 +1,6 @@
 from methods.data_parsing_methods import Base_data_method    
 import os
-Rerun_alll = False
+Rerun_alll = True
 json_dir = os.path.join("data", "scryfall_bulk_data")
 images_dir = os.path.join("data", "cards_image_gallery")
 bad_images_dir = os.path.join("data", "bad_image")

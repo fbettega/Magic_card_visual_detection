@@ -112,37 +112,10 @@ X_hog, y = load_images_parallel(filtered_cards, method="hog", num_workers=16)
 
 X_train_hog, X_test_hog, y_train, y_test = train_test_split(X_hog, y, test_size=0.2, random_state=42)
 
-# Séparation des données
-subset_size = min(50000, len(X_train_hog))
-X_train_subset, y_train_subset = X_train_hog[:subset_size], y_train[:subset_size]
-# Optimisation Random Forest
-rf_params = {
-    'n_estimators': [100, 200, 500],
-    'max_depth': [10, 20, None],
-    'min_samples_split': [2, 5, 10]
-}
-# On limite le nombre de jobs pour éviter les conflits CPU
-rf_grid = RandomizedSearchCV(
-    RandomForestClassifier(n_jobs=4, max_samples=0.8),  # max_samples limite la RAM utilisée
-    param_distributions=rf_params,
-    n_iter=10,  # Réduit le nombre d'essais pour ne pas exploser la mémoire
-    cv=3,
-    verbose=1,
-    n_jobs=1  # Important : éviter le conflit avec `n_jobs` de RandomForest
-)
-
-rf_grid.fit(X_train_subset, y_train_subset)
-best_rf = rf_grid.best_estimator_
-
-# Évaluation Random Forest optimisé
-accuracy_rf = best_rf.score(X_test_hog, y_test)
-print(f"Précision Random Forest optimisé : {accuracy_rf:.2f}")
-dump(best_rf, "layout_predictor_rf_optimized.joblib")
-
 ###########################################################
 # Conversion des données en GPU avec `cupy`
 X_train_hog_gpu = cp.asarray(X_train_hog)
-y_train_gpu = cp.asarray(y_train)
+# y_train_gpu = cp.asarray(y_train)
 
 # Optimisation XGBoost
 xgb_params = {
@@ -152,7 +125,7 @@ xgb_params = {
 }
 
 xgb_random = RandomizedSearchCV(
-    xgb.XGBClassifier(tree_method="gpu_hist", predictor="gpu_predictor", device="cuda"),  # Activation du GPU
+    xgb.XGBClassifier(tree_method="gpu_hist", device="cuda"),  # Activation du GPU
     param_distributions=xgb_params,
     n_iter=10,  # 10 combinaisons aléatoires pour éviter la surcharge
     cv=3,
@@ -166,19 +139,5 @@ best_xgb = xgb_random.best_estimator_
 # Évaluation XGBoost optimisé
 accuracy_xgb = best_xgb.score(X_test_hog, y_test)
 print(f"Précision XGBoost optimisé : {accuracy_xgb:.2f}")
-dump(best_xgb, "layout_predictor_xgb_optimized.joblib")
+dump(best_xgb, "data/model/layout/layout_predictor_xgb_optimized.joblib")
 
-# ======= Utilisation de ResNet50 =======
-X_resnet, y_resnet = load_images_parallel(filtered_cards, method="resnet", num_workers=8)
-# Séparation des données pour ResNet50
-X_train_resnet, X_test_resnet, _, _ = train_test_split(X_resnet, y, test_size=0.2, random_state=42)
-
-# Entraînement Random Forest avec ResNet50
-best_rf.fit(X_train_resnet, y_train)
-accuracy_rf_resnet = best_rf.score(X_test_resnet, y_test)
-print(f"Précision Random Forest avec ResNet50 : {accuracy_rf_resnet:.2f}")
-
-# Entraînement XGBoost avec ResNet50
-best_xgb.fit(X_train_resnet, y_train)
-accuracy_xgb_resnet = best_xgb.score(X_test_resnet, y_test)
-print(f"Précision XGBoost avec ResNet50 : {accuracy_xgb_resnet:.2f}")
