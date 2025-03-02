@@ -17,7 +17,6 @@ class Base_data_method:
             return False 
         
         forbidden_patterns = {"missing", "placeholder", "en/normal/back", "default_back"}
-
         return not any(pattern in url for pattern in forbidden_patterns) 
 
     # Fonction pour télécharger une image
