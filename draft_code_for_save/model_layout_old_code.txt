@@ -17,3 +17,86 @@ X_train_resnet, X_test_resnet, _, _ = train_test_split(X_resnet, y, test_size=0.
 best_xgb.fit(X_train_resnet, y_train)
 accuracy_xgb_resnet = best_xgb.score(X_test_resnet, y_test)
 print(f"Précision XGBoost avec ResNet50 : {accuracy_xgb_resnet:.2f}")
+
+>>> best_xgb_rarity, accuracy_xgb_rarity = train_xgboost(X_train_hog_gpu, y_rarity_train, X_test_hog_gpu, y_rarity_test, "rarity",rerun=retrain_model)
+Fitting 3 folds for each of 10 candidates, totalling 30 fits
+[CV 1/3; 1/10] START learning_rate=0.1, max_depth=6, n_estimators=100...........
+/home/fbettega/Magic_card_visual_detection/.venv/lib/python3.12/site-packages/xgboost/core.py:158: UserWarning: [21:56:38] WARNING: /workspace/src/common/error_msg.cc:27: The tree method `gpu_hist` is deprecated since 2.0.0. To use GPU training, set the `device` parameter to CUDA instead.
+
+    E.g. tree_method = "hist", device = "cuda"
+
+  warnings.warn(smsg, UserWarning)
+/home/fbettega/Magic_card_visual_detection/.venv/lib/python3.12/site-packages/xgboost/core.py:158: UserWarning: [21:57:20] WARNING: /workspace/src/common/error_msg.cc:27: The tree method `gpu_hist` is deprecated since 2.0.0. To use GPU training, set the `device` parameter to CUDA instead.
+
+    E.g. tree_method = "hist", device = "cuda"
+
+  warnings.warn(smsg, UserWarning)
+[CV 1/3; 1/10] END learning_rate=0.1, max_depth=6, n_estimators=100;, score=0.922 total time=  42.7s
+[CV 2/3; 1/10] START learning_rate=0.1, max_depth=6, n_estimators=100...........
+/home/fbettega/Magic_card_visual_detection/.venv/lib/python3.12/site-packages/xgboost/core.py:158: UserWarning: [21:57:21] WARNING: /workspace/src/common/error_msg.cc:27: The tree method `gpu_hist` is deprecated since 2.0.0. To use GPU training, set the `device` parameter to CUDA instead.
+
+    E.g. tree_method = "hist", device = "cuda"
+
+  warnings.warn(smsg, UserWarning)
+/home/fbettega/Magic_card_visual_detection/.venv/lib/python3.12/site-packages/xgboost/core.py:158: UserWarning: [21:57:58] WARNING: /workspace/src/common/error_msg.cc:27: The tree method `gpu_hist` is deprecated since 2.0.0. To use GPU training, set the `device` parameter to CUDA instead.
+
+    E.g. tree_method = "hist", device = "cuda"
+
+  warnings.warn(smsg, UserWarning)
+[CV 2/3; 1/10] END learning_rate=0.1, max_depth=6, n_estimators=100;, score=0.921 total time=  37.6s
+[CV 3/3; 1/10] START learning_rate=0.1, max_depth=6, n_estimators=100...........
+/home/fbettega/Magic_card_visual_detection/.venv/lib/python3.12/site-packages/xgboost/core.py:158: UserWarning: [21:57:58] WARNING: /workspace/src/common/error_msg.cc:27: The tree method `gpu_hist` is deprecated since 2.0.0. To use GPU training, set the `device` parameter to CUDA instead.
+
+    E.g. tree_method = "hist", device = "cuda"
+
+  warnings.warn(smsg, UserWarning)
+/home/fbettega/Magic_card_visual_detection/.venv/lib/python3.12/site-packages/xgboost/core.py:158: UserWarning: [21:58:39] WARNING: /workspace/src/common/error_msg.cc:27: The tree method `gpu_hist` is deprecated since 2.0.0. To use GPU training, set the `device` parameter to CUDA instead.
+
+    E.g. tree_method = "hist", device = "cuda"
+
+  warnings.warn(smsg, UserWarning)
+[CV 3/3; 1/10] END learning_rate=0.1, max_depth=6, n_estimators=100;, score=0.918 total time=  40.8s
+[CV 1/3; 2/10] START learning_rate=0.1, max_depth=3, n_estimators=500...........
+/home/fbettega/Magic_card_visual_detection/.venv/lib/python3.12/site-packages/xgboost/core.py:158: UserWarning: [21:58:39] WARNING: /workspace/src/common/error_msg.cc:27: The tree method `gpu_hist` is deprecated since 2.0.0. To use GPU training, set the `device` parameter to CUDA instead.
+
+    E.g. tree_method = "hist", device = "cuda"
+
+  warnings.warn(smsg, UserWarning)
+/home/fbettega/Magic_card_visual_detection/.venv/lib/python3.12/site-packages/xgboost/core.py:158: UserWarning: [21:59:30] WARNING: /workspace/src/common/error_msg.cc:27: The tree method `gpu_hist` is deprecated since 2.0.0. To use GPU training, set the `device` parameter to CUDA instead.
+
+    E.g. tree_method = "hist", device = "cuda"
+
+  warnings.warn(smsg, UserWarning)
+[CV 1/3; 2/10] END learning_rate=0.1, max_depth=3, n_estimators=500;, score=0.926 total time=  51.0s
+[CV 2/3; 2/10] START learning_rate=0.1, max_depth=3, n_estimators=500...........
+/home/fbettega/Magic_card_visual_detection/.venv/lib/python3.12/site-packages/xgboost/core.py:158: UserWarning: [21:59:30] WARNING: /workspace/src/common/error_msg.cc:27: The tree method `gpu_hist` is deprecated since 2.0.0. To use GPU training, set the `device` parameter to CUDA instead.
+
+    E.g. tree_method = "hist", device = "cuda"
+
+  warnings.warn(smsg, UserWarning)
+/home/fbettega/Magic_card_visual_detection/.venv/lib/python3.12/site-packages/xgboost/core.py:158: UserWarning: [22:00:20] WARNING: /workspace/src/common/error_msg.cc:27: The tree method `gpu_hist` is deprecated since 2.0.0. To use GPU training, set the `device` parameter to CUDA instead.
+
+    E.g. tree_method = "hist", device = "cuda"
+
+  warnings.warn(smsg, UserWarning)
+[CV 2/3; 2/10] END learning_rate=0.1, max_depth=3, n_estimators=500;, score=0.925 total time=  50.8s
+[CV 3/3; 2/10] START learning_rate=0.1, max_depth=3, n_estimators=500...........
+/home/fbettega/Magic_card_visual_detection/.venv/lib/python3.12/site-packages/xgboost/core.py:158: UserWarning: [22:00:21] WARNING: /workspace/src/common/error_msg.cc:27: The tree method `gpu_hist` is deprecated since 2.0.0. To use GPU training, set the `device` parameter to CUDA instead.
+
+    E.g. tree_method = "hist", device = "cuda"
+
+  warnings.warn(smsg, UserWarning)
+/home/fbettega/Magic_card_visual_detection/.venv/lib/python3.12/site-packages/xgboost/core.py:158: UserWarning: [22:01:11] WARNING: /workspace/src/common/error_msg.cc:27: The tree method `gpu_hist` is deprecated since 2.0.0. To use GPU training, set the `device` parameter to CUDA instead.
+
+    E.g. tree_method = "hist", device = "cuda"
+
+  warnings.warn(smsg, UserWarning)
+[CV 3/3; 2/10] END learning_rate=0.1, max_depth=3, n_estimators=500;, score=0.925 total time=  50.9s
+[CV 1/3; 3/10] START learning_rate=0.2, max_depth=9, n_estimators=500...........
+/home/fbettega/Magic_card_visual_detection/.venv/lib/python3.12/site-packages/xgboost/core.py:158: UserWarning: [22:01:12] WARNING: /workspace/src/common/error_msg.cc:27: The tree method `gpu_hist` is deprecated since 2.0.0. To use GPU training, set the `device` parameter to CUDA instead.
+
+    E.g. tree_method = "hist", device = "cuda"
+
+  warnings.warn(smsg, UserWarning)
+best_xgb_layout, accuracy_xgb_layout = train_xgboost(X_train_hog_gpu, y_layout_train, X_test_hog_gpu, y_layout_test, "layout",rerun=retrain_model)
+# Entraînement du modèle pour le set
