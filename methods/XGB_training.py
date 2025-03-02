@@ -31,7 +31,7 @@ class CardImageProcessor:
         img = cv2.resize(img, self.image_size)
         features = hog(img, self.orientations, self.pixels_per_cell, self.cells_per_block)
         
-        return features, card.layout, card.set, card.rarity
+        return features, card.layout, card.border_color
 
     def load_images_parallel(self, filtered_cards, target_y, max_per_y=None):
         X, y = [], []
@@ -40,7 +40,7 @@ class CardImageProcessor:
         
         # Pré-filtrage des cartes avant chargement des images
         for card in filtered_cards.values():
-            target_value = {"layout": card.layout, "extension": card.set, "rarity": card.rarity}[target_y]
+            target_value = {"layout": card.layout, "border_color": card.border_color}[target_y]
             
             if max_per_y is not None and count_per_y[target_value] >= max_per_y:
                 continue
@@ -56,8 +56,8 @@ class CardImageProcessor:
             if res is None:
                 continue
             
-            features, layout, extension, rarity = res
-            target_value = {"layout": layout, "extension": extension, "rarity": rarity}[target_y]
+            features, layout, border_color = res
+            target_value = {"layout": layout, "border_color": border_color}[target_y]
             
             X.append(features)
             y.append(target_value)
