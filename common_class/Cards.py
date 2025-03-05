@@ -14,7 +14,7 @@ class Card:
         self.frame = data.get("frame", "")
         self.artist = data.get("artist", "")
         self.flavor_text = data.get("flavor_text", "")
-
+        self.language = data.get("lang", "")
         # Textes imprimés
         self.printed_text = data.get("printed_text", "")
         self.printed_name = data.get("printed_name", "")
