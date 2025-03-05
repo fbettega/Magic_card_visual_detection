@@ -10,6 +10,7 @@ back_reference = os.path.join("data", "other_file", "default_back.jpg")
 if Rerun_alll:
     Base_data_method.download_all_cards(json_dir)
 
+
 cards = Base_data_method.parse_large_json(os.path.join(json_dir,"all_cards.json"))
 
 # Warning need more than one run to DL all cards ?

@@ -23,6 +23,19 @@ class Card:
         # Gestion des cartes en fonction de leur layout
         self.card_faces = data.get("card_faces", [])
         self.image_status = data.get("image_status", "")  # Ajout de image_status
+                # Mapping des raretés vers la lettre correspondante
+        rarity_mapping = {
+            "common": "C",
+            "uncommon": "U",
+            "rare": "R",
+            "mythic": "M",
+            "bonus": "S",  # Pour les cartes 'bonus' ou 'special'
+            "special": "S"
+        }
+
+        # Attribution de la lettre de rareté
+        self.rarity_letter = rarity_mapping.get(self.rarity, "Unknown")
+        
         if self.layout in {"transform", "modal_dfc", "double_faced_token"}:
             # Cartes double face (recto/verso)
             self.name_front = self.card_faces[0].get("name", "Unknown Front")
@@ -88,13 +101,13 @@ class Card:
     def get_images(self):
         """Récupère les URLs des images en tenant compte des cartes double face."""
         images = []
-
         if self.card_faces:
             for i, face in enumerate(self.card_faces):
                 image_url = face.get("image_uris", {}).get("normal")
                 if image_url:
                     face_name = self.sanitize_filename(face.get("name", f"face_{i}"))
-                    images.append((image_url, f"{self.id}_{face_name}.jpg",self.image_status))
+                    face_type = "front" if i == 0 else "back"
+                    images.append((image_url, f"{self.id}_{face_name}_{face_type}.jpg", self.image_status))
 
         elif self.image_uris_front:
             image_url = self.image_uris_front.get("normal")

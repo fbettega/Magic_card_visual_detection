@@ -25,6 +25,18 @@ for layout, layout_cards in filtered_cards.items():
 # Conversion en une liste unique
 final_sample = [card for cards_list in sampled_cards.values() for card in cards_list]
 
+for card in cards.values():
+    images = card.get_images()
+    if not images:
+        continue
+    for url, image_filename, statut in images:
+        if "_front.jpg" in image_filename:
+            print(image_filename)
+
+from collections import Counter
+set_type_counts = Counter(card.set_type for card in cards.values())
+
+
 
 # Génération des annotations
 for card in final_sample:
@@ -56,6 +68,11 @@ for card in final_sample:
             "1": card.mana_cost_front,
             "2": card.artist,
             "3": card.rarity,
+            # missing
+            # rarity text
+            # set symbol
+            # copyright
+            # cryptograme
             "4": card.collector_number,
             "5": card.language,
             "6": card.flavor_text,

@@ -62,7 +62,7 @@ class Base_data_method:
         cards_dict = {}
         with open(file_path, 'r', encoding='utf-8') as f:
             for item in ijson.items(f, "item"):
-                if not item.get("digital", False): 
+                if not item.get("digital", False) and item.get("set_type") != "minigame": 
                     cards_dict[item["id"]] = Card(item)
         return cards_dict
 
