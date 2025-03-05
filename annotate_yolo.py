@@ -26,35 +26,56 @@ for layout, layout_cards in filtered_cards.items():
 final_sample = [card for cards_list in sampled_cards.values() for card in cards_list]
 
 
-
-
+# Génération des annotations
 for card in final_sample:
-    card_id = card.id
-    url, image_path, statut = card.get_images()[0]
-    image_filename = os.path.join(images_dir, "cards_image_gallery")
-    label_filename = os.path.join(label_dir, f"{card_id}.txt")
+    images = card.get_images()
+    if not images:
+        continue
     
-    # Vérifier si l'image existe
-    if not os.path.exists(os.path.join(images_dir, image_filename)):
-        continue  # Passer si l'image est absente
+    for url, image_filename, statut in images:
+        image_path = os.path.join(images_dir, image_filename)
+        label_filename = os.path.join(label_dir, f"{card.id}.txt")
+        
+        # Vérifier si l'image existe
+        if not os.path.exists(image_path):
+            continue
 
-    # Récupérer les informations
-    name = card.name
-    mana_cost = card.mana_cost
-    artist = card.artist
-    rarity = card.rarity
-    collector_number = card.collector_number
-    language = card.language
-    flavor_text = card.flavor_text 
-    printed_text = card.printed_text 
-    printed_name = card.printed_name 
-    printed_type_line = card.printed_type_line 
+        # Gestion des versions imprimées
+        if card.language == "en":
+            printed_text = card.oracle_text_front or ""
+            printed_name = card.name_front or ""
+            printed_type_line = card.type_line_front or ""
+        else:
+            printed_text = card.printed_text or card.oracle_text_front or ""
+            printed_name = card.printed_name or card.name_front or ""
+            printed_type_line = card.printed_type_line or card.type_line_front or ""
 
-    # Générer un fichier d’annotation YOLO
-    with open(label_filename, "w", encoding="utf-8") as f:
-        f.write(f"0 {name}\n")  # Classe "Nom de la carte"
-        f.write(f"1 {mana_cost}\n")  # Classe "Coût en mana"
-        f.write(f"2 {artist}\n")  # Classe "Artiste"
-        f.write(f"3 {rarity}\n")  # Classe "Rareté"
-        f.write(f"4 {collector_number}\n")  # Classe "Numéro de la carte"
-        f.write(f"5 {language}\n")  # Classe "Langue"
+        # Récupération des informations de la carte
+        attributes = {
+            "0": card.name_front,
+            "1": card.mana_cost_front,
+            "2": card.artist,
+            "3": card.rarity,
+            "4": card.collector_number,
+            "5": card.language,
+            "6": card.flavor_text,
+            "7": printed_text,
+            "8": printed_name,
+            "9": printed_type_line,
+        }
+        
+        # Ajouter les informations de la face arrière si applicable
+        if card.layout in {"transform", "modal_dfc", "double_faced_token", "adventure", "split", "flip"}:
+            attributes.update({
+                "10": card.name_back,
+                "11": card.mana_cost_back,
+                "12": card.type_line_back,
+                "13": ",".join(card.colors_back) if card.colors_back else "",
+                "14": card.oracle_text_back or "",
+            })
+
+        # Écriture du fichier d’annotation
+        with open(label_filename, "w", encoding="utf-8") as f:
+            for key, value in attributes.items():
+                if value:
+                    f.write(f"{key} {value}\n")
