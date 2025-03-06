@@ -42,51 +42,59 @@ for card in final_sample:
         # Vérifier si l'image existe
         if not os.path.exists(image_path):
             continue
-        # Gestion des versions imprimées
+
+        is_back = "_back.jpg" in image_filename
+
+        # Déterminer le suffixe en fonction de la face de la carte
+        side = "back" if is_back else "front"
+
+        # Récupérer les valeurs dynamiquement
+        mana_cost = getattr(card, f"mana_cost_{side}", "") or ""
+        watermark = getattr(card, f"watermark_{side}", "") or ""
+
+        power = getattr(card, f"power_{side}", "") or ""
+        toughness = getattr(card, f"toughness_{side}", "") or ""
+        loyalty = getattr(card, f"loyalty_{side}", "") or "" 
+
+        # Détermination de carac_result
+        if power and toughness and loyalty:
+            print(f"⚠️ WARNING: Card {printed_name} with power/toughness and loyalty.")
+
+        if power and toughness:
+            carac_result = f"{power}/{toughness}"
+        elif loyalty:
+            carac_result = loyalty
+        else:
+            carac_result = ""
+
         if card.language == "en":
-            printed_text = card.oracle_text_front or ""
-            printed_name = card.name_front or ""
-            printed_type_line = card.type_line_front or ""
+            printed_text = getattr(card, f"oracle_text_{side}", "") or ""
+            printed_name = getattr(card, f"name_{side}", "") or ""
+            printed_type_line = getattr(card, f"type_line_{side}", "") or ""
         else:
-            printed_text = card.printed_text or card.oracle_text_front or ""
-            printed_name = card.printed_name or card.name_front or ""
-            printed_type_line = card.printed_type_line or card.type_line_front or ""
-        # Définition des attributs sous forme de liste
+            printed_text = getattr(card, f"printed_text_{side}", "") or ""
+            printed_name = getattr(card, f"printed_name_{side}", "") or ""
+            printed_type_line = getattr(card, f"printed_type_line_{side}", "") or ""
+
         # manque les stat loyalty force et endu
-        if "_back.jpg" in image_filename:
-            attributes = [
-                card.name_back,
-                card.mana_cost_back,
-                card.artist,
-                card.rarity,
-                card.collector_number,
-                card.language,
-                card.flavor_text,
-                card.oracle_text_back,  # Texte Oracle du dos
-                card.type_line_back,  # Type du dos
-                card.rarity_letter,
-                "",  # Set symbol (vide)
-                "",  # Copyright (vide)
-                card.security_stamp,   # Cryptogramme (vide)
-                card.watermark_back # Text on card image and collector symbol
-            ]
-        else:
-            attributes = [
-                printed_name,
-                card.mana_cost_front,
-                card.artist,
-                card.rarity,
-                card.collector_number,
-                card.language,
-                card.flavor_text,
-                printed_text,
-                printed_type_line,
-                card.rarity_letter,
-                "",  # Set symbol (vide)
-                "",  # Copyright (vide)
-                card.security_stamp,   # Cryptogramme (vide)
-                card.watermark_front# Text on card image and collector symbol
-            ]
+        attributes = [
+            printed_name,
+            mana_cost,
+            card.artist,
+            card.rarity,
+            card.collector_number,
+            card.language,
+            card.flavor_text,
+            carac_result,
+            # to add card stat loyalty or pwoer / endu
+            printed_text,  # Texte Oracle du dos
+            printed_type_line,  # Type du dos
+            card.rarity_letter,
+            "",  # Set symbol (vide)
+            "",  # Copyright (vide)
+            card.security_stamp,   # Cryptogramme (vide)
+            watermark # Text on card image and collector symbol
+        ]
 
         # Écriture du fichier d’annotation avec numérotation automatique
         with open(label_filename, "w", encoding="utf-8") as f:
