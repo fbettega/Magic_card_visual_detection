@@ -25,16 +25,6 @@ for layout, layout_cards in filtered_cards.items():
 # Conversion en une liste unique
 final_sample = [card for cards_list in sampled_cards.values() for card in cards_list]
 
-for card in cards.values():
-    images = card.get_images()
-    if not images:
-        continue
-    for url, image_filename, statut in images:
-        if "_front.jpg" in image_filename:
-            print(image_filename)
-
-from collections import Counter
-set_type_counts = Counter(card.set_type for card in cards.values())
 
 
 
@@ -68,8 +58,6 @@ for card in final_sample:
             "1": card.mana_cost_front,
             "2": card.artist,
             "3": card.rarity,
-            # missing
-            # rarity text
             # set symbol
             # copyright
             # cryptograme
@@ -79,6 +67,7 @@ for card in final_sample:
             "7": printed_text,
             "8": printed_name,
             "9": printed_type_line,
+            "10":card.rarity_letter
         }
         
         # Ajouter les informations de la face arrière si applicable
@@ -96,3 +85,15 @@ for card in final_sample:
             for key, value in attributes.items():
                 if value:
                     f.write(f"{key} {value}\n")
+
+
+# for card in cards.values():
+#     images = card.get_images()
+#     if not images:
+#         continue
+#     for url, image_filename, statut in images:
+#         if "_front.jpg" in image_filename:
+#             print(image_filename)
+
+# from collections import Counter
+# set_type_counts = Counter(card.set_type for card in cards.values())

@@ -2,8 +2,10 @@ import os
 from sklearn.model_selection import StratifiedShuffleSplit
 from methods.data_parsing_methods import Base_data_method    
 from methods.XGB_training import CardImageProcessor
-
-
+#################################################################################################################################################################################
+retrain_model = False
+json_dir = os.path.join("data", "scryfall_bulk_data")
+images_dir = os.path.join("data", "cards_image_gallery")
 #################################################################################################################################################################################
 def process_target(images_dir:str, filtered_cards, target_y:str, retrain_model:bool, max_per_y=5000, test_size=0.2):
     """
@@ -40,9 +42,7 @@ def process_target(images_dir:str, filtered_cards, target_y:str, retrain_model:b
 
     return (X_hog,y, label_encoder),best_model, accuracy
 #################################################################################################################################################################################
-retrain_model = False
-json_dir = os.path.join("data", "scryfall_bulk_data")
-images_dir = os.path.join("data", "cards_image_gallery")
+
 
 
 cards = Base_data_method.parse_large_json(os.path.join(json_dir,"all_cards.json"))
