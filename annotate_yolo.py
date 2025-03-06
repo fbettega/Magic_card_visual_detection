@@ -12,6 +12,7 @@ os.makedirs(label_dir, exist_ok=True)
 os.makedirs(image_label_dir, exist_ok=True)
 cards = Base_data_method.parse_large_json(os.path.join(json_dir,"all_cards.json"))
 
+
 # Filtrage des cartes en anglais et regroupement par layout
 filtered_cards = defaultdict(list)
 for card in cards.values():

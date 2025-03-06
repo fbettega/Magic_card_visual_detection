@@ -60,7 +60,7 @@ class Base_data_method:
     # Fonction pour parser un gros JSON et stocker les cartes dans une liste
     def parse_large_json(file_path:str) -> dict[str, Card]:
         cards_dict = {}
-        exclude_layout = {'token','art_series'}
+        exclude_layout = {'token','art_series','emblem','planar'}
         with open(file_path, 'r', encoding='utf-8') as f:
             for item in ijson.items(f, "item"):
                 card_name = item.get("name", "")
