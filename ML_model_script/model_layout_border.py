@@ -3,7 +3,7 @@ from sklearn.model_selection import StratifiedShuffleSplit
 from methods.data_parsing_methods import Base_data_method    
 from methods.XGB_training import CardImageProcessor
 #################################################################################################################################################################################
-retrain_model = False
+retrain_model = True
 json_dir = os.path.join("data", "scryfall_bulk_data")
 images_dir = os.path.join("data", "cards_image_gallery")
 #################################################################################################################################################################################

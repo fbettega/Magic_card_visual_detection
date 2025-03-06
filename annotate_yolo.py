@@ -11,8 +11,7 @@ image_label_dir = os.path.join("data","yolo_anotate", "images")
 os.makedirs(label_dir, exist_ok=True)
 os.makedirs(image_label_dir, exist_ok=True)
 cards = Base_data_method.parse_large_json(os.path.join(json_dir,"all_cards.json"))
-
-
+cards["018830b2-dff9-45f3-9cc2-dc5b2eec0e54"]
 # Filtrage des cartes en anglais et regroupement par layout
 filtered_cards = defaultdict(list)
 for card in cards.values():
@@ -41,7 +40,6 @@ for card in final_sample:
         # Vérifier si l'image existe
         if not os.path.exists(image_path):
             continue
-
         # Gestion des versions imprimées
         if card.language == "en":
             printed_text = card.oracle_text_front or ""
@@ -51,9 +49,10 @@ for card in final_sample:
             printed_text = card.printed_text or card.oracle_text_front or ""
             printed_name = card.printed_name or card.name_front or ""
             printed_type_line = card.printed_type_line or card.type_line_front or ""
-
         # Définition des attributs sous forme de liste
         if "_back.jpg" in image_filename:
+            print(card.id)
+            print(image_filename)
             attributes = [
                 card.name_back,
                 card.mana_cost_back,
@@ -99,7 +98,7 @@ for card in final_sample:
 
 for card in cards.values():
     images = card.get_images()
-    if card.set_type=='memorabilia':
+    if card.set_name=='Unknown Event':
         print(card.image_uris_front.get("normal"))
     # if not images:
     #     continue
