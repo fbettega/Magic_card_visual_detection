@@ -3,11 +3,13 @@ import os
 from methods.data_parsing_methods import Base_data_method 
 from collections import defaultdict
 import random
+import shutil
 json_dir = os.path.join("data", "scryfall_bulk_data")
 images_dir = os.path.join("data", "cards_image_gallery")
-label_dir = os.path.join("data", "labels") 
+label_dir = os.path.join("data","yolo_anotate", "labels") 
+image_label_dir = os.path.join("data","yolo_anotate", "images") 
 os.makedirs(label_dir, exist_ok=True)
-
+os.makedirs(image_label_dir, exist_ok=True)
 cards = Base_data_method.parse_large_json(os.path.join(json_dir,"all_cards.json"))
 
 # Filtrage des cartes en anglais et regroupement par layout
@@ -20,12 +22,13 @@ for card in cards.values():
 # Sélectionner 100 cartes au maximum par layout
 sampled_cards = {}
 for layout, layout_cards in filtered_cards.items():
-    sampled_cards[layout] = random.sample(layout_cards, min(100, len(layout_cards)))
+    sorted_cards = sorted(layout_cards, key=lambda c: c.id)  # Trier par ID ou un autre critère
+    sampled_cards[layout] = random.sample(sorted_cards, min(100, len(sorted_cards)))
 
 # Conversion en une liste unique
 final_sample = [card for cards_list in sampled_cards.values() for card in cards_list]
 
-
+cards["06e5f736-2696-4428-a611-2d93e0c4e1cf"]
 
 
 # Génération des annotations
@@ -33,11 +36,10 @@ for card in final_sample:
     images = card.get_images()
     if not images:
         continue
-    
     for url, image_filename, statut in images:
         image_path = os.path.join(images_dir, image_filename)
+        image_dest_path = os.path.join(image_label_dir, image_filename)
         label_filename = os.path.join(label_dir, f"{card.id}.txt")
-        
         # Vérifier si l'image existe
         if not os.path.exists(image_path):
             continue
@@ -52,48 +54,60 @@ for card in final_sample:
             printed_name = card.printed_name or card.name_front or ""
             printed_type_line = card.printed_type_line or card.type_line_front or ""
 
-        # Récupération des informations de la carte
-        attributes = {
-            "0": card.name_front,
-            "1": card.mana_cost_front,
-            "2": card.artist,
-            "3": card.rarity,
-            # set symbol
-            # copyright
-            # cryptograme
-            "4": card.collector_number,
-            "5": card.language,
-            "6": card.flavor_text,
-            "7": printed_text,
-            "8": printed_name,
-            "9": printed_type_line,
-            "10":card.rarity_letter
-        }
-        
-        # Ajouter les informations de la face arrière si applicable
-        if card.layout in {"transform", "modal_dfc", "double_faced_token", "adventure", "split", "flip"}:
-            attributes.update({
-                "10": card.name_back,
-                "11": card.mana_cost_back,
-                "12": card.type_line_back,
-                "13": ",".join(card.colors_back) if card.colors_back else "",
-                "14": card.oracle_text_back or "",
-            })
+        # Définition des attributs sous forme de liste
+        if "_back.jpg" in image_filename:
+            attributes = [
+                card.name_back,
+                card.mana_cost_back,
+                card.artist,
+                card.rarity,
+                card.collector_number,
+                card.language,
+                card.flavor_text,
+                card.oracle_text_back,  # Texte Oracle du dos
+                card.type_line_back,  # Type du dos
+                card.rarity_letter,
+                "",  # Set symbol (vide)
+                "",  # Copyright (vide)
+                "",   # Cryptogramme (vide)
+                ""# Text on card image and collector symbol
+            ]
+        else:
+            attributes = [
+                printed_name,
+                card.mana_cost_front,
+                card.artist,
+                card.rarity,
+                card.collector_number,
+                card.language,
+                card.flavor_text,
+                printed_text,
+                printed_type_line,
+                card.rarity_letter,
+                "",  # Set symbol (vide)
+                "",  # Copyright (vide)
+                "",   # Cryptogramme (vide)
+                ""# Text on card image and collector symbol
+            ]
 
-        # Écriture du fichier d’annotation
+        # Écriture du fichier d’annotation avec numérotation automatique
         with open(label_filename, "w", encoding="utf-8") as f:
-            for key, value in attributes.items():
-                if value:
-                    f.write(f"{key} {value}\n")
+            for idx, value in enumerate(attributes):
+                f.write(f"{idx} {value}\n")
+
+        shutil.copy(image_path, image_dest_path)
 
 
-# for card in cards.values():
-#     images = card.get_images()
-#     if not images:
-#         continue
-#     for url, image_filename, statut in images:
-#         if "_front.jpg" in image_filename:
-#             print(image_filename)
+
+for card in cards.values():
+    images = card.get_images()
+    if card.set_type=='memorabilia':
+        print(card.image_uris_front.get("normal"))
+    # if not images:
+    #     continue
+    # for url, image_filename, statut in images:
+    #     if "_front.jpg" in image_filename:
+    #         print(image_filename)
 
 # from collections import Counter
 # set_type_counts = Counter(card.set_type for card in cards.values())
