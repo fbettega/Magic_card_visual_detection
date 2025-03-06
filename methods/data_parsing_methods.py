@@ -65,9 +65,7 @@ class Base_data_method:
                 card_name = item.get("name", "")
                 set_type = item.get("set_type", "")
                 set_code = item.get("set", "")
-
                 if  item.get("set_name", "").startswith("World Championship") and set_code.startswith("wc") and (card_name.endswith(" Bio") or card_name.endswith(" Decklist")):
-                    print(f"filter {card_name}" )
                     continue
                 if not item.get("digital", False) and set_type != "minigame": 
                     cards_dict[item["id"]] = Card(item)
