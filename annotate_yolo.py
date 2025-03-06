@@ -11,7 +11,8 @@ image_label_dir = os.path.join("data","yolo_anotate", "images")
 os.makedirs(label_dir, exist_ok=True)
 os.makedirs(image_label_dir, exist_ok=True)
 cards = Base_data_method.parse_large_json(os.path.join(json_dir,"all_cards.json"))
-cards["018830b2-dff9-45f3-9cc2-dc5b2eec0e54"]
+
+
 # Filtrage des cartes en anglais et regroupement par layout
 filtered_cards = defaultdict(list)
 for card in cards.values():
@@ -31,7 +32,8 @@ final_sample = [card for cards_list in sampled_cards.values() for card in cards_
 # Génération des annotations
 for card in final_sample:
     images = card.get_images()
-    if not images:
+    # remove scret lair in this version to remove strange non magic cards
+    if not images or card.set_name =='Secret Lair Drop':
         continue
     for url, image_filename, statut in images:
         image_path = os.path.join(images_dir, image_filename)
@@ -50,9 +52,8 @@ for card in final_sample:
             printed_name = card.printed_name or card.name_front or ""
             printed_type_line = card.printed_type_line or card.type_line_front or ""
         # Définition des attributs sous forme de liste
+        # manque les stat loyalty force et endu
         if "_back.jpg" in image_filename:
-            print(card.id)
-            print(image_filename)
             attributes = [
                 card.name_back,
                 card.mana_cost_back,
@@ -66,8 +67,8 @@ for card in final_sample:
                 card.rarity_letter,
                 "",  # Set symbol (vide)
                 "",  # Copyright (vide)
-                "",   # Cryptogramme (vide)
-                ""# Text on card image and collector symbol
+                card.security_stamp,   # Cryptogramme (vide)
+                card.watermark_back # Text on card image and collector symbol
             ]
         else:
             attributes = [
@@ -83,19 +84,18 @@ for card in final_sample:
                 card.rarity_letter,
                 "",  # Set symbol (vide)
                 "",  # Copyright (vide)
-                "",   # Cryptogramme (vide)
-                ""# Text on card image and collector symbol
+                card.security_stamp,   # Cryptogramme (vide)
+                card.watermark_front# Text on card image and collector symbol
             ]
 
         # Écriture du fichier d’annotation avec numérotation automatique
         with open(label_filename, "w", encoding="utf-8") as f:
             for idx, value in enumerate(attributes):
-                f.write(f"{idx} {value}\n")
-
-        shutil.copy(image_path, image_dest_path)
-
+                _ = f.write(f"{idx} {value}\n")
+        _ = shutil.copy(image_path, image_dest_path)
 
 
+cards['8bcf942f-5afd-414e-a50d-00d884fe59da']
 for card in cards.values():
     images = card.get_images()
     if card.set_name=='Unknown Event':
@@ -107,4 +107,75 @@ for card in cards.values():
     #         print(image_filename)
 
 # from collections import Counter
-# set_type_counts = Counter(card.set_type for card in cards.values())
+# set_type_counts = Counter(card.layout for card in cards.values())
+
+# suite
+
+# from paddleocr import PaddleOCR
+# import cv2
+
+# ocr = PaddleOCR(use_angle_cls=True, lang="en")  # OCR en anglais
+
+# def detect_text_regions(image_path):
+#     """ Détecte les zones de texte et renvoie leurs coordonnées. """
+#     image = cv2.imread(image_path)
+#     results = ocr.ocr(image, cls=True)
+    
+#     annotations = []
+    
+#     for res in results:
+#         for line in res:
+#             bbox, text, confidence = line
+#             x_min, y_min = int(bbox[0][0]), int(bbox[0][1])
+#             x_max, y_max = int(bbox[2][0]), int(bbox[2][1])
+#             annotations.append((x_min, y_min, x_max, y_max, text))
+    
+#     return annotations
+
+# # Exemple sur une carte
+# image_path = "dataset/images/12345678.jpg"
+# annotations = detect_text_regions(image_path)
+
+# for ann in annotations:
+#     print(f"Texte: {ann[4]}, BBox: {ann[:4]}")
+
+# import os
+
+# class_mapping = {
+#     "Nom": 0,
+#     "Mana_Cost": 1,
+#     "Artiste": 2,
+#     "Rareté": 3,
+#     "Numéro": 4,
+#     "Langue": 5
+# }
+
+# def convert_to_yolo_format(image_path, annotations):
+#     img = cv2.imread(image_path)
+#     height, width, _ = img.shape
+
+#     yolo_annotations = []
+    
+#     for x_min, y_min, x_max, y_max, text in annotations:
+#         x_center = (x_min + x_max) / 2.0 / width
+#         y_center = (y_min + y_max) / 2.0 / height
+#         bbox_width = (x_max - x_min) / width
+#         bbox_height = (y_max - y_min) / height
+
+#         class_id = class_mapping.get(text, -1)  # Associer le texte à une classe
+#         if class_id != -1:
+#             yolo_annotations.append(f"{class_id} {x_center:.6f} {y_center:.6f} {bbox_width:.6f} {bbox_height:.6f}")
+    
+#     return yolo_annotations
+
+# # Générer les annotations pour une image
+# image_path = "dataset/images/12345678.jpg"
+# annotations = detect_text_regions(image_path)
+# yolo_annotations = convert_to_yolo_format(image_path, annotations)
+
+# # Sauvegarde du fichier d’annotation YOLO
+# label_path = "dataset/labels/12345678.txt"
+# with open(label_path, "w") as f:
+#     f.write("\n".join(yolo_annotations))
+
+# print(f"Annotations YOLO enregistrées pour {image_path}.")

@@ -15,10 +15,12 @@ class Card:
         self.artist = data.get("artist", "")
         self.flavor_text = data.get("flavor_text", "")
         self.language = data.get("lang", "")
-        # Textes imprimés
-        self.printed_text = data.get("printed_text", "")
-        self.printed_name = data.get("printed_name", "")
-        self.printed_type_line = data.get("printed_type_line", "")
+        self.flavor_name = data.get("flavor_name", "")
+        self.promo_types = data.get("promo_types", "")
+        self.textless = data.get("textless", "")
+        self.security_stamp = data.get("security_stamp", "")
+        self.frame_effects = data.get("frame_effects", "")
+
 
         # Gestion des cartes en fonction de leur layout
         self.card_faces = data.get("card_faces", [])
@@ -35,8 +37,7 @@ class Card:
 
         # Attribution de la lettre de rareté
         self.rarity_letter = rarity_mapping.get(self.rarity, "Unknown")
-        
-        if self.layout in {"transform", "modal_dfc", "double_faced_token"}:
+        if self.layout in {"reversible_card","transform", "modal_dfc", "double_faced_token"}:
             # Cartes double face (recto/verso)
             self.name_front = self.card_faces[0].get("name", "Unknown Front")
             self.oracle_text_front = self.card_faces[0].get("oracle_text", "")
@@ -44,8 +45,13 @@ class Card:
             self.type_line_front = self.card_faces[0].get("type_line", "")
             self.power_front = self.card_faces[0].get("power", "")
             self.toughness_front = self.card_faces[0].get("toughness", "")
+            self.loyalty_front = self.card_faces[0].get("loyalty", "")
             self.colors_front = self.card_faces[0].get("colors", [])
             self.image_uris_front = self.card_faces[0].get("image_uris", {})
+            self.printed_text_front =  self.card_faces[0].get("printed_text", "")
+            self.printed_name_front =  self.card_faces[0].get("printed_name", "")
+            self.printed_type_line_front =  self.card_faces[0].get("printed_type_line", "")
+            self.watermark_front =  self.card_faces[0].get("watermark", "")
 
             self.name_back = self.card_faces[1].get("name", "Unknown Back")
             self.oracle_text_back = self.card_faces[1].get("oracle_text", "")
@@ -53,9 +59,13 @@ class Card:
             self.type_line_back = self.card_faces[1].get("type_line", "")
             self.power_back = self.card_faces[1].get("power", "")
             self.toughness_back = self.card_faces[1].get("toughness", "")
+            self.loyalty_back = self.card_faces[1].get("loyalty", "")
             self.colors_back = self.card_faces[1].get("colors", [])
             self.image_uris_back = self.card_faces[1].get("image_uris", {})
-            
+            self.printed_text_back =  self.card_faces[1].get("printed_text", "")
+            self.printed_name_back =  self.card_faces[1].get("printed_name", "")
+            self.printed_type_line_back =  self.card_faces[1].get("printed_type_line", "")
+            self.watermark_back =  self.card_faces[1].get("watermark", "")
         elif self.layout in {"adventure", "split", "flip"}:
             # Cartes d'aventure ou fractionnées
             self.name_front = self.card_faces[0].get("name", "Unknown Front")
@@ -64,6 +74,14 @@ class Card:
             self.type_line_front = self.card_faces[0].get("type_line", "")
             self.colors_front = self.card_faces[0].get("colors", [])
             self.image_uris_front = self.card_faces[0].get("image_uris", {})
+            self.power_front = self.card_faces[0].get("power", "")
+            self.toughness_front = self.card_faces[0].get("toughness", "")
+            self.loyalty_front = self.card_faces[0].get("loyalty", "")
+
+            self.printed_text_front =  self.card_faces[0].get("printed_text", "")
+            self.printed_name_front =  self.card_faces[0].get("printed_name", "")
+            self.printed_type_line_front =  self.card_faces[0].get("printed_type_line", "")
+            self.watermark_front =  self.card_faces[0].get("watermark", "")
 
             if len(self.card_faces) > 1:
                 self.name_back = self.card_faces[1].get("name", "Unknown Back")
@@ -71,10 +89,27 @@ class Card:
                 self.mana_cost_back = self.card_faces[1].get("mana_cost", "")
                 self.type_line_back = self.card_faces[1].get("type_line", "")
                 self.colors_back = self.card_faces[1].get("colors", [])
+                self.power_back = self.card_faces[1].get("power", "")
+                self.toughness_back = self.card_faces[1].get("toughness", "")
+                self.loyalty_back = self.card_faces[1].get("loyalty", "")
+
+                self.printed_text_back =  self.card_faces[1].get("printed_text", "")
+                self.printed_name_back =  self.card_faces[1].get("printed_name", "")
+                self.printed_type_line_back =  self.card_faces[1].get("printed_type_line", "")
+                self.watermark_back =  self.card_faces[1].get("watermark", "")
             else:
                 self.name_back = self.oracle_text_back = ""
                 self.mana_cost_back = self.type_line_back = ""
                 self.colors_back = []
+                self.type_line_back =  ""
+                self.colors_back = ""
+                self.power_back = ""
+                self.toughness_back = ""
+                self.loyalty_back = ""
+                self.printed_text_back =   ""
+                self.printed_name_back =   ""
+                self.printed_type_line_back =   ""
+                self.watermark_back =   ""
 
         else:
             # Cartes normales (simple face)
@@ -84,9 +119,14 @@ class Card:
             self.type_line_front = data.get("type_line", "")
             self.power_front = data.get("power", "")
             self.toughness_front = data.get("toughness", "")
+            self.loyalty_front = data.get.get("loyalty", "")
             self.colors_front = data.get("colors", [])
             self.image_uris_front = data.get("image_uris", {})
-
+            # Textes imprimés
+            self.printed_text_front = data.get("printed_text", "")
+            self.printed_name_front = data.get("printed_name", "")
+            self.printed_type_line_front = data.get("printed_type_line", "")
+            self.watermark_front = data.get("watermark", "")
 
     def __repr__(self):
         attrs = vars(self)  # Récupère tous les attributs sous forme de dict
