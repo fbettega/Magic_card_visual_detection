@@ -60,14 +60,18 @@ class Base_data_method:
     # Fonction pour parser un gros JSON et stocker les cartes dans une liste
     def parse_large_json(file_path:str) -> dict[str, Card]:
         cards_dict = {}
+        exclude_layout = {'token','art_series'}
         with open(file_path, 'r', encoding='utf-8') as f:
             for item in ijson.items(f, "item"):
                 card_name = item.get("name", "")
                 set_type = item.get("set_type", "")
                 set_code = item.get("set", "")
-                if  item.get("set_name", "").startswith("World Championship") and set_code.startswith("wc") and (card_name.endswith(" Bio") or card_name.endswith(" Decklist")):
+                # remove token in first place 
+                if item.get("digital", False) or set_type == "minigame" or item.get("layout", "") in exclude_layout: 
                     continue
-                if not item.get("digital", False) and set_type != "minigame": 
+                elif item.get("set_name", "").startswith("World Championship") and set_code.startswith("wc") and (card_name.endswith(" Bio") or card_name.endswith(" Decklist")):
+                    continue
+                else:
                     cards_dict[item["id"]] = Card(item)
         return cards_dict
 

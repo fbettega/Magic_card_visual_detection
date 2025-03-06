@@ -28,9 +28,6 @@ for layout, layout_cards in filtered_cards.items():
 # Conversion en une liste unique
 final_sample = [card for cards_list in sampled_cards.values() for card in cards_list]
 
-cards["06e5f736-2696-4428-a611-2d93e0c4e1cf"]
-
-
 # Génération des annotations
 for card in final_sample:
     images = card.get_images()
