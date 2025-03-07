@@ -21,7 +21,9 @@ class Card:
         self.security_stamp = data.get("security_stamp", "")
         self.frame_effects = data.get("frame_effects", "")
 
-
+        # add boolean token statuts
+        self.token = self.layout in {'double_faced_token','token','emblem'} or self.set == 'token'
+ 
         # Gestion des cartes en fonction de leur layout
         self.card_faces = data.get("card_faces", [])
         self.image_status = data.get("image_status", "")  # Ajout de image_status
@@ -119,7 +121,7 @@ class Card:
             self.type_line_front = data.get("type_line", "")
             self.power_front = data.get("power", "")
             self.toughness_front = data.get("toughness", "")
-            self.loyalty_front = data.get.get("loyalty", "")
+            self.loyalty_front = data.get("loyalty", "")
             self.colors_front = data.get("colors", [])
             self.image_uris_front = data.get("image_uris", {})
             # Textes imprimés

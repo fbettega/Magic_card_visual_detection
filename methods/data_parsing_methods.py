@@ -61,9 +61,12 @@ class Base_data_method:
     def parse_large_json(file_path:str) -> dict[str, Card]:
         cards_dict = {}
         # remove minigame and funny set_tyupe
-        bad_set_type = {"minigame",'funny','archenemy','token'}
+        bad_set_type = {
+            "minigame",'funny','archenemy'
+                        }
         # remove token emblem art series planar minigame custom cards ('Unknown Event')
-        exclude_layout = {'vanguard','scheme','double_faced_token','token','art_series','emblem','planar'}
+        exclude_layout = {'vanguard','scheme',
+                          'art_series','planar'}
         with open(file_path, 'r', encoding='utf-8') as f:
             for item in ijson.items(f, "item"):
                 card_name = item.get("name", "")
@@ -71,7 +74,7 @@ class Base_data_method:
                 set_code = item.get("set", "")
                 set_name = item.get("set_name", "")
                 # remove token in first place 
-                if not item.get("oversized", False) or item.get("digital", False) or set_type in bad_set_type or item.get("layout", "") in exclude_layout or set_name == 'Unknown Event': 
+                if item.get("oversized", False) or item.get("digital", False) or set_type in bad_set_type or item.get("layout", "") in exclude_layout or set_name == 'Unknown Event': 
                     continue
                 elif set_name.startswith("World Championship") and set_code.startswith("wc") and (card_name.endswith(" Bio") or card_name.endswith(" Decklist")):
                     continue

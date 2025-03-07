@@ -12,7 +12,6 @@ os.makedirs(label_dir, exist_ok=True)
 os.makedirs(image_label_dir, exist_ok=True)
 cards = Base_data_method.parse_large_json(os.path.join(json_dir,"all_cards.json"))
 
-
 # Filtrage des cartes en anglais et regroupement par layout
 filtered_cards = defaultdict(list)
 for card in cards.values():
@@ -114,8 +113,9 @@ for card in cards.values():
     #     if "_front.jpg" in image_filename:
     #         print(image_filename)
 
+# len(cards)
 # from collections import Counter
-# set_type_counts = Counter(card.layout for card in cards.values())
+# set_type_counts = Counter(card.token for card in cards.values())
 
 # suite
 
