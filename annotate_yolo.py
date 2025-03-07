@@ -101,21 +101,78 @@ for card in final_sample:
                 _ = f.write(f"{idx} {value}\n")
         _ = shutil.copy(image_path, image_dest_path)
 
+##############################################################################################################
+# debug
+# Filtrage des cartes en anglais et regroupement par layout
+
+debug_filtered_cards = defaultdict()
+for card in cards.values():
+    if not card.token:  # Vérifie si la carte a du texte imprimé en anglais
+        debug_filtered_cards[card.id] = card
+
+len(cards)
+from collections import Counter
+set_type_counts = Counter(card.token for card in cards.values())
+promo_type_counts = Counter(promo for card in debug_filtered_cards.values() for promo in card.promo_types)
+
 
 cards['8bcf942f-5afd-414e-a50d-00d884fe59da']
+max_count = 10
+count = 0
 for card in cards.values():
     images = card.get_images()
     if card.set_name=='Unknown Event':
+        count += 1
         print(card.image_uris_front.get("normal"))
+    if count > max_count:
+        break
+max_count = 10
+count = 0
+for card in debug_filtered_cards.values():
+    if 'schinesealtart' in card.promo_types:
+        count += 1
+        print(card.image_uris_front.get("normal"))
+    if count > max_count:
+        break
     # if not images:
     #     continue
     # for url, image_filename, statut in images:
     #     if "_front.jpg" in image_filename:
     #         print(image_filename)
 
-# len(cards)
-# from collections import Counter
-# set_type_counts = Counter(card.token for card in cards.values())
+# >>> promo_type_counts
+# Counter({'boosterfun': 36737, 'prerelease': 3707, 'datestamped': 3640, 
+#          'promopack': 2727, 'mediainsert': 2310, 'planeswalkerdeck': 2236, 
+#         'stamped': 2123, 'setpromo': 2081, 'surgefoil': 1538, 'ripplefoil': 1337,
+#         'starterdeck': 1133, 'boxtopper': 1090, 'startercollection': 838,
+#         'beginnerbox': 774, 'firstplacefoil': 772, 'bundle': 494, 'buyabox': 369,
+#         'silverfoil': 369,  'dossier': 350, 'sldbonus': 336,
+#         'themepack': 333, 'tourney': 296, 'textured': 295, 'serialized': 294,
+#         'doublerainbow': 287, 'portrait': 280, 'magnified': 240, 'fnm': 227,
+#         'halofoil': 211, 'thick': 200, 'judgegift': 174, 'rainbowfoil': 166,
+#         'instore': 161,  'vault': 155, 
+#         'ravnicacity': 135, 'playtest': 123, 'release': 110, 'imagine': 108, 'doubleexposure': 107,
+#         'embossed': 99, 'arenaleague': 84, 'gameday': 84,  'stepandcompleat': 76,
+#         'raisedfoil': 72, 'schinesealtart': 72,  'wizardsplaynetwork': 64, 'manafoil': 60,
+#         'convention': 56, 'playerrewards': 53, 'premiereshop': 51, 'resale': 48, 'gilded': 48, 'storechampionship': 41,
+#         'intropack': 40, 'fracturefoil': 40, 'concept': 37, 'oilslick': 25, 'brawldeck': 24, 'event': 24,
+#         'confettifoil': 20, 'neonink': 20, 'giftbox': 16, 'invisibleink': 14, 'duels': 14,
+#         'commanderparty': 11, 'galaxyfoil': 10, 'openhouse': 10, 'playpromo': 9, 'setextension': 9,
+#         'draftweekend': 9, 'glossy': 7, 'alchemy': 7, 'bringafriend': 6, 'league': 6, 'moonlitland': 5,
+#         })
+# playtest
+# godzillaseries vault  draculaseries ravnicacity wizardsplaynetwork imagine
+
+#  poster
+
+# Card 
+# 'jpwalker': 72,'scroll': 359,
+# 'upsidedown': 1, 'upsidedownback': 1
+# 'draculaseries': 148,'godzillaseries': 160,
+# not cards
+# 'poster': 80,
+# end debug
+##############################################################################################################
 
 # suite
 
