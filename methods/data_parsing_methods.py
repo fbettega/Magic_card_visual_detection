@@ -74,7 +74,8 @@ class Base_data_method:
                 set_code = item.get("set", "")
                 set_name = item.get("set_name", "")
                 # remove token in first place 
-                if item.get("oversized", False) or item.get("digital", False) or set_type in bad_set_type or item.get("layout", "") in exclude_layout or set_name == 'Unknown Event': 
+
+                if item.get("oversized", False) or item.get("digital", False) or set_type in bad_set_type or item.get("layout", "") in exclude_layout:  #  or set_name == 'Unknown Event'
                     continue
                 elif set_name.startswith("World Championship") and set_code.startswith("wc") and (card_name.endswith(" Bio") or card_name.endswith(" Decklist")):
                     continue

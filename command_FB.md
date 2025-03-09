@@ -1,8 +1,8 @@
 Generate requierment.txt using pipreqs --force --ignore .venv --mode no-pin
 pip install -r ./requirements.txt
 <!-- bash -->
-find . -type f -iname \*.jpg -delete
-
+find ./data/cards_image_gallery -type f -iname \*.jpg -delete
+find ./data/bad_image -type f -iname \*.jpg -delete
 
 <!-- python  -->
 from collections import Counter
