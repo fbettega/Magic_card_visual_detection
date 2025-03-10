@@ -5,8 +5,11 @@ import numpy as np
 import ijson
 import requests
 from common_class.Cards import Card
-import json
-from concurrent.futures import ThreadPoolExecutor
+import os
+import shutil
+import numpy as np
+import cv2
+from concurrent.futures import ProcessPoolExecutor
 
 class Base_data_method:
     ########################################################
@@ -117,52 +120,76 @@ class Base_data_method:
         else:
             print("❌ 'All Cards' not found in Scryfall data")
     #######################################################################
-    def is_card_back(image_path: str, back_card_references: list, threshold=0.95) -> bool:
-        """Compare une image avec deux références du dos de carte et retourne True si c'est un dos de carte."""
+    def is_card_back(image_path, reference_histograms, threshold=0.90):
+        """Vérifie si une image correspond à l'un des dos de carte de référence."""
         try:
-            # Vérifie si c'est bien un fichier image
             if not os.path.isfile(image_path):
-                print(f"⚠️ Fichier ignoré (non valide) : {image_path}")
                 return False
 
-            img = Image.open(image_path).convert("L").resize((100, 100))  # Grayscale + Resize
-            hist_img = np.array(img.histogram())
+            img = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
+            if img is None:
+                return False  # Image non lisible
 
-            for ref_path in back_card_references:
-                ref = Image.open(ref_path).convert("L").resize((100, 100))
-                hist_ref = np.array(ref.histogram())
+            img = cv2.resize(img, (100, 100))
+            hist_img = cv2.calcHist([img], [0], None, [256], [0, 256]).flatten()
+            hist_img /= np.linalg.norm(hist_img)  # Normalisation
 
-                # Similarité cosinus entre les histogrammes
-                similarity = np.dot(hist_img, hist_ref) / (np.linalg.norm(hist_img) * np.linalg.norm(hist_ref))
-                if similarity > threshold:
-                    return True  # Si l'image correspond à l'une des références, c'est un dos de carte
-
-            return False
+            # Vérification avec les références
+            return any(np.dot(hist_img, hist_ref) > threshold for hist_ref in reference_histograms)
         except Exception as e:
             print(f"Erreur lors de la vérification de {image_path} : {e}")
             return False
 
-    def detect_and_move_back(self,image_entry, back_reference, bad_images_dir):
-        """Détecte si l'image est un dos de carte et la déplace si nécessaire."""
-        if image_entry.name == ".gitignore":
-            return None  # Ignorer .gitignore
-        image_path = image_entry.path
-        if Base_data_method.is_card_back(image_path, back_reference):
-            new_path = os.path.join(bad_images_dir, image_entry.name)
+
+    def load_reference_histograms(back_card_references):
+        """Charge une seule fois les histogrammes des dos de carte."""
+        reference_histograms = []
+        for ref_path in back_card_references:
+            ref = cv2.imread(ref_path, cv2.IMREAD_GRAYSCALE)
+            if ref is None:
+                print(f"⚠️ Impossible de charger l'image de référence : {ref_path}")
+                continue
+
+            ref = cv2.resize(ref, (100, 100))
+            hist_ref = cv2.calcHist([ref], [0], None, [256], [0, 256]).flatten()
+            hist_ref /= np.linalg.norm(hist_ref)  # Normalisation
+            reference_histograms.append(hist_ref)
+        
+        if not reference_histograms:
+            raise ValueError("Aucune image de référence valide n'a été chargée.")
+        
+        return reference_histograms
+
+
+    def detect_and_move_back(image_path, reference_histograms, bad_images_dir):
+        """Détecte si une image est un dos de carte et la déplace si nécessaire."""
+        if Base_data_method.is_card_back(image_path, reference_histograms):
+            new_path = os.path.join(bad_images_dir, os.path.basename(image_path))
             shutil.move(image_path, new_path)  # Déplacement
-            return image_entry.name  # Retourne le nom des fichiers déplacés
+            return image_path
         return None
 
-    def move_card_backs_parallel(self,images_dir, back_reference, bad_images_dir, max_workers=8):
+    @staticmethod
+    def move_card_backs_parallel(images_dir, back_references, bad_images_dir, max_workers=8):
         """Parallélise la détection et le déplacement des dos de cartes."""
         os.makedirs(bad_images_dir, exist_ok=True)
-        with ThreadPoolExecutor(max_workers=max_workers) as executor:
-            # Scan rapide des fichiers (sans précharger la liste en mémoire)
-            with os.scandir(images_dir) as entries:
-                futures = [executor.submit(self.detect_and_move_back, entry, back_reference, bad_images_dir)
-                        for entry in entries if entry.is_file()]
 
-            # Récupération des fichiers déplacés
-            moved_files = [future.result() for future in futures if future.result()]
+        # Charger les histogrammes des dos de carte une seule fois
+        reference_histograms = Base_data_method.load_reference_histograms(back_references)
+
+        # Liste des fichiers
+        image_paths = [entry.path for entry in os.scandir(images_dir) if entry.is_file()]
+
+        # ProcessPoolExecutor pour le multi-processing
+        with ProcessPoolExecutor(max_workers=max_workers) as executor:
+            results = executor.map(
+                Base_data_method.detect_and_move_back,
+                image_paths,  # Fichiers images
+                [reference_histograms] * len(image_paths),  # Références partagées
+                [bad_images_dir] * len(image_paths)  # Dossier de destination
+            )
+
+        # Récupération des fichiers déplacés
+        moved_files = [res for res in results if res]
 
         print(f"✅ {len(moved_files)} dos de cartes déplacés vers {bad_images_dir}.")
