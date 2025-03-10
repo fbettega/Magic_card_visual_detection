@@ -105,9 +105,10 @@ for card in final_sample:
 # debug
 # Filtrage des cartes en anglais et regroupement par layout
 
+exclude_promo_type = {'poster','playtest'}
 debug_filtered_cards = defaultdict()
 for card in cards.values():
-    if not card.token:  # Vérifie si la carte a du texte imprimé en anglais
+    if not card.token or not exclude_promo_type in card.promo_types:  # Vérifie si la carte a du texte imprimé en anglais
         debug_filtered_cards[card.id] = card
 
 len(debug_filtered_cards)
@@ -140,13 +141,13 @@ os.makedirs(debug_images_dir, exist_ok=True)
 max_count = 100
 count = 0
 for card in debug_filtered_cards.values():
-    if 'playerrewards' in card.promo_types:
+    if 'playtest' in card.promo_types:
         images = card.get_images()
         if not images:
             continue
         count += 1
-        image_path = os.path.join(images_dir, image_filename)
         for url, image_filename, statut in images:
+            image_path = os.path.join(images_dir, image_filename)
             if not os.path.exists(image_path):
                 continue
             image_dest_path = os.path.join(debug_images_dir, image_filename)
@@ -192,7 +193,7 @@ for card in debug_filtered_cards.values():
 # 'dossier': 350, 
 # some times not a cards 
 # 'sldbonus': 336,'tourney': 296,'playerrewards': 53, 
-# not cards
+# never a cards cards
 # 'poster': 80,'playtest': 123,
 # end debug
 ##############################################################################################################

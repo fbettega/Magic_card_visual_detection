@@ -117,23 +117,27 @@ class Base_data_method:
         else:
             print("❌ 'All Cards' not found in Scryfall data")
     #######################################################################
-    def is_card_back(image_path: str, back_card_reference: str, threshold=0.95) -> bool:
-        """Compare une image avec une référence du dos de carte et retourne True si c'est un dos de carte."""
+    def is_card_back(image_path: str, back_card_references: list, threshold=0.95) -> bool:
+        """Compare une image avec deux références du dos de carte et retourne True si c'est un dos de carte."""
         try:
-        # Vérifie si c'est bien un fichier image
+            # Vérifie si c'est bien un fichier image
             if not os.path.isfile(image_path):
                 print(f"⚠️ Fichier ignoré (non valide) : {image_path}")
                 return False
 
             img = Image.open(image_path).convert("L").resize((100, 100))  # Grayscale + Resize
-            ref = Image.open(back_card_reference).convert("L").resize((100, 100))
-
             hist_img = np.array(img.histogram())
-            hist_ref = np.array(ref.histogram())
 
-            # Similarité cosinus entre les histogrammes
-            similarity = np.dot(hist_img, hist_ref) / (np.linalg.norm(hist_img) * np.linalg.norm(hist_ref))
-            return similarity > threshold
+            for ref_path in back_card_references:
+                ref = Image.open(ref_path).convert("L").resize((100, 100))
+                hist_ref = np.array(ref.histogram())
+
+                # Similarité cosinus entre les histogrammes
+                similarity = np.dot(hist_img, hist_ref) / (np.linalg.norm(hist_img) * np.linalg.norm(hist_ref))
+                if similarity > threshold:
+                    return True  # Si l'image correspond à l'une des références, c'est un dos de carte
+
+            return False
         except Exception as e:
             print(f"Erreur lors de la vérification de {image_path} : {e}")
             return False

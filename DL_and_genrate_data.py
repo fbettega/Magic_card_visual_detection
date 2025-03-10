@@ -4,7 +4,7 @@ Rerun_alll = True
 json_dir = os.path.join("data", "scryfall_bulk_data")
 images_dir = os.path.join("data", "cards_image_gallery")
 bad_images_dir = os.path.join("data", "bad_image")
-back_reference = os.path.join("data", "other_file", "default_back.jpg")
+back_reference = [os.path.join("data", "other_file", "default_back.jpg"),os.path.join("data", "other_file", "default_back2.jpg")]
 
 
 if Rerun_alll:
