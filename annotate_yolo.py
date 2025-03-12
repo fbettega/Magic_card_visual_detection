@@ -106,9 +106,10 @@ for card in final_sample:
 # Filtrage des cartes en anglais et regroupement par layout
 
 exclude_promo_type = {'poster','playtest'}
+exclude_set_for_normal_cards = {"Secret Lair Drop"}
 debug_filtered_cards = defaultdict()
 for card in cards.values():
-    if not card.token or not exclude_promo_type in card.promo_types:  # Vérifie si la carte a du texte imprimé en anglais
+    if not (card.token or  any(exclude_promo_type_elem in card.promo_types for exclude_promo_type_elem in exclude_promo_type)  or card.set_name in exclude_set_for_normal_cards):  # Vérifie si la carte a du texte imprimé en anglais
         debug_filtered_cards[card.id] = card
 
 len(debug_filtered_cards)
@@ -117,31 +118,15 @@ set_type_counts = Counter(card.token for card in cards.values())
 promo_type_counts = Counter(promo for card in debug_filtered_cards.values() for promo in card.promo_types)
 
 
-max_count = 100
-count = 0
-for card in cards.values():
-    images = card.get_images()
-    if card.set_name=='Unknown Event':
-        count += 1
-        print(card.image_uris_front.get("normal"))
-    if count > max_count:
-        break
-max_count = 100
-count = 0
 
-for card in debug_filtered_cards.values():
-    if 'schinesealtart' in card.promo_types:
-        count += 1
-        print(card.image_uris_front.get("normal"))
-    if count > max_count:
-        break
+
 
 debug_images_dir = os.path.join("data", "debug_image")   
 os.makedirs(debug_images_dir, exist_ok=True)
 max_count = 100
 count = 0
 for card in debug_filtered_cards.values():
-    if 'playtest' in card.promo_types:
+    if 'embossed' in card.promo_types:
         images = card.get_images()
         if not images:
             continue
@@ -268,3 +253,22 @@ for card in debug_filtered_cards.values():
 #     f.write("\n".join(yolo_annotations))
 
 # print(f"Annotations YOLO enregistrées pour {image_path}.")
+
+########### old code
+# max_count = 100
+# count = 0
+# for card in cards.values():
+#     images = card.get_images()
+#     if card.set_name=='Unknown Event':
+#         count += 1
+#         print(card.image_uris_front.get("normal"))
+#     if count > max_count:
+#         break
+# max_count = 100
+# count = 0
+# for card in debug_filtered_cards.values():
+#     if 'schinesealtart' in card.promo_types:
+#         count += 1
+#         print(card.image_uris_front.get("normal"))
+#     if count > max_count:
+#         break
